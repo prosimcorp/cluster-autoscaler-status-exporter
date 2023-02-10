@@ -11,7 +11,8 @@ MAIN_DIR := src
 
 # Image URL to use all building/pushing image targets
 VERSION ?= latest
-IMG ?= prosimcorp/certificates-discovery:v${VERSION}
+IMG ?= cluster-autoscaler-status-exporter:v${VERSION}
+PLATFORM ?= linux/amd64
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.23
 
@@ -54,7 +55,7 @@ build:
 
 .PHONY: docker-build
 docker-build: test
-	docker build -t ${IMG} .
+	docker buildx build --platform ${PLATFORM} -t ${IMG} .
 
 .PHONY: docker-push
 docker-push:

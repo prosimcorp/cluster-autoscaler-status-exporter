@@ -19,6 +19,7 @@ Each release of this container is done following several steps carefully in orde
 2. Define the package information
 
     ```console
+    export PLATFORM="linux/amd64"
     export VERSION="0.0.1"
     ```
 
