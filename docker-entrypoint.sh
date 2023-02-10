@@ -2,4 +2,4 @@
 set -e
 
 # Execute stress test
-case "$@"
+./case "$@"
