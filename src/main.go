@@ -25,18 +25,21 @@ const (
 	ConfigmapRetrieveErrorMessage  = "error obtaining cluster-autoscaler status configmap from the cluster"
 	ConfigMapParseErrorMessage     = "error parsing status configmap (hint: syntax has changed between cluster-autoscaler versions?)"
 	MetricsUpdateErrorMessage      = "imposible to update prometheus metrics"
+	MetricsWebserverErrorMessage   = "imposible to launch metrics webserver: %s"
 )
 
 // SynchronizeStatus TODO
 // Prometheus ref: https://prometheus.io/docs/guides/go-application/
-func SynchronizeStatus(client *kubernetes.Clientset, namespace string, configmap string) (err error) {
+func SynchronizeStatus(client *kubernetes.Clientset, namespace string, configmap string) {
 
 	for {
 		// Get configmap from the cluster
 		configMap, err := client.CoreV1().ConfigMaps(namespace).Get(context.TODO(), configmap, metav1.GetOptions{})
 		if err != nil {
 			log.Print(ConfigmapRetrieveErrorMessage)
-			break
+
+			time.Sleep(SynchronizationScheduleSeconds * time.Second)
+			continue
 		}
 
 		// Look for all the NG names and health arguments
@@ -57,8 +60,6 @@ func SynchronizeStatus(client *kubernetes.Clientset, namespace string, configmap
 
 		time.Sleep(SynchronizationScheduleSeconds * time.Second)
 	}
-
-	return err
 }
 
 func main() {
@@ -84,5 +85,8 @@ func main() {
 	// Start a webserver for exposing metrics endpoint
 	metricsHost := *metricsHostFlag + ":" + *metricsPortFlag
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(metricsHost, nil)
+	err = http.ListenAndServe(metricsHost, nil)
+	if err != nil {
+		log.Printf(MetricsWebserverErrorMessage, err)
+	}
 }
