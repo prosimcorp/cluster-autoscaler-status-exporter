@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cluster-autoscaler-status-exporter
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {}
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels: {}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                      - arm64
+                      - ppc64le
+                      - s390x
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+      containers:
+        - name: manager
+          image: prosimcorp/cluster-autoscaler-status-exporter:latest
+          command:
+            - /manager
+          args:
+            - --connection-mode=incluster
+
+            # Next flags are those you need to configure the path to your CA Status configmap
+            # - --namespace kube-system
+            # - --configmap cluster-autoscaler-status
+          ports:
+            - containerPort: 2112
+              name: port-2112
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 32m
+              memory: 128Mi
+            requests:
+              cpu: 16m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      securityContext:
+        runAsNonRoot: true
+      serviceAccountName: cluster-autoscaler-status-exporter
+      terminationGracePeriodSeconds: 10
+

@@ -4,6 +4,19 @@
 
 An exporter that parses Cluster Autoscaler's status and expose it for Prometheus
 
+## Deployment
+
+We have designed the deployment of this project to allow remote deployment using Kustomize. This way it is possible
+to use it with a GitOps approach, using tools such as ArgoCD or FluxCD. Just make a Kustomization manifest referencing
+the tag of the version you want to deploy as follows:
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- https://github.com/prosimcorp/cluster-autoscaler-status-exporter//deploy/?ref=main
+```
+
 ## How to release
 
 Each release of this container is done following several steps carefully in order not to break the things for anyone.
@@ -27,10 +40,6 @@ Each release of this container is done following several steps carefully in orde
     ```console
     make docker-buildx
     ```
-
-## How to deploy
-
-TBD
 
 ## Flags
 

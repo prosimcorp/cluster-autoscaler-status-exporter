@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cluster-autoscaler-status-exporter
+  annotations:
+    newrelic.io/scrape: "true"
+    nri-prometheus/scrape: "true"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "2112"
+    prometheus.io/path: "/metrics"
+  labels: {}
+  namespace: default
+spec:
+  ports:
+    - name: port-2112
+      port: 2112
+      protocol: TCP
+      targetPort: 2112
+  selector: {}
+  type: ClusterIP

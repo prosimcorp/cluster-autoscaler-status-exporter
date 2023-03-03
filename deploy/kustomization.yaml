@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+
+namespace: cluster-autoscaler-status-exporter
+
+resources:
+  - clusterRole.yaml
+  - clusterRoleBinding.yaml
+
+  - namespace.yaml
+  - serviceAccount.yaml
+  - service.yaml
+  - deployment.yaml
+
+images:
+  - name: prosimcorp/cluster-autoscaler-status-exporter:latest
+    newTag: v0.0.1
