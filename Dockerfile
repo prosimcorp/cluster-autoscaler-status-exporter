@@ -1,54 +1,31 @@
-########################################################################################################################
-# BASE
-########################################################################################################################
-FROM debian:buster-slim as base
+# Build the manager binary
+FROM golang:1.19 as builder
+ARG TARGETOS
+ARG TARGETARCH
 
-# Prepare app directory
-RUN mkdir -p /usr/app/case/
-WORKDIR /usr/app/case/
+WORKDIR /workspace
+# Copy the Go Modules manifests
+COPY src/go.mod go.mod
+COPY src/go.sum go.sum
+# cache deps before building and copying source so that we don't need to re-download as much
+# and so that source changes don't invalidate our downloaded layer
+RUN go mod download
 
-# Configure entrypoint
-COPY ./docker-entrypoint.sh /usr/local/bin/
-RUN chmod 0775 /usr/local/bin/docker-entrypoint.sh
-ENTRYPOINT ["docker-entrypoint.sh"]
-# This step will be replaced by the entrypoint plus the args field defined in the kubernetes eployment manifest
-CMD ["sh"]
+# Copy the go source
+COPY src/ .
 
-########################################################################################################################
-# BUILD
-########################################################################################################################
-FROM golang:1.19-buster as build
+# Build
+# the GOARCH has not a default value to allow the binary be built according to the host where the command
+# was called. For example, if we call make docker-build in a local env which has the Apple Silicon M1 SO
+# the docker BUILDPLATFORM arg will be linux/arm64 when for Apple x86 it will be linux/amd64. Therefore,
+# by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o manager .
 
-# Copy the application files
-COPY . /usr/app/case/
+# Use distroless as minimal base image to package the manager binary
+# Refer to https://github.com/GoogleContainerTools/distroless for more details
+FROM gcr.io/distroless/static:nonroot
+WORKDIR /
+COPY --from=builder /workspace/manager .
+USER 65532:65532
 
-# Build the application
-RUN cd /usr/app/case/ \
-    && make build
-
-########################################################################################################################
-# APPLICATION
-# FOR PROD BUILD ADD TARGET FLAG: docker build . --tag 'case:buster-slim' --target application
-########################################################################################################################
-FROM base as application
-
-# Copy the build application to the working directory
-COPY --from=build /usr/app/case/bin/* /usr/app/case/
-
-# Prepare executable permissions
-RUN chmod -R 0775 /usr/app/case/case
-
-# Link application
-RUN ln -s /usr/app/case/case /usr/local/bin/case && \
-    chmod +x /usr/local/bin/case
-
-########################################################################################################################
-# DEBUG
-# FOR A DEBUG BUILD: docker build . --tag 'case:buster-slim'
-########################################################################################################################
-FROM application as debug
-# Install debug packages
-RUN apt-get update --yes && \
-    apt-get install --yes --no-install-recommends \
-        bash \
-        procps
+ENTRYPOINT ["/manager"]

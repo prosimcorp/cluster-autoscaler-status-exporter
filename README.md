@@ -19,19 +19,18 @@ Each release of this container is done following several steps carefully in orde
 2. Define the package information
 
     ```console
-    export PLATFORM="linux/amd64"
     export VERSION="0.0.1"
     ```
 
 3. Generate and push the Docker image (published on Docker Hub).
 
     ```console
-    make docker-build docker-push
+    make docker-buildx
     ```
 
 ## How to deploy
 
-TODO
+TBD
 
 ## Flags
 
@@ -57,3 +56,19 @@ For doing it, open an issue to discuss the need of the changes, then:
 - Fork the repository
 - Make your changes to the code
 - Open a PR and wait for review
+
+## License
+
+Copyright 2022.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
