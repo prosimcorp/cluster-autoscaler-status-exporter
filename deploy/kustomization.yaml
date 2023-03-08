@@ -13,4 +13,4 @@ resources:
 
 images:
   - name: prosimcorp/cluster-autoscaler-status-exporter:latest
-    newTag: v0.0.1
+    newTag: v0.1.0
