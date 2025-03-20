@@ -17,6 +17,14 @@ resources:
 - https://github.com/prosimcorp/cluster-autoscaler-status-exporter//deploy/?ref=main
 ```
 
+For helm users, we have also provided a Helm chart that can be used to deploy the exporter. The Helm chart is available
+with:
+
+```shell
+$ helm repo add prosimcorp https://prosimcorp.github.io/helm-charts
+$ helm install cluster-autoscaler-status-exporter prosimcorp/cluster-autoscaler-status-exporter
+```
+
 ## How to run
 
 You can run the exporter using the following command:
