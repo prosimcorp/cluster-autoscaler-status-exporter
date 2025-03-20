@@ -1,0 +1,22 @@
+---
+
+# Logging configuration
+logging:
+  # debug, info, warn, error, dpanic, panic, fatal
+  level: info
+  # console or json
+  format: json
+
+# Server configuration
+server:
+  # Address to listen on
+  listenAddress: ":2112"
+  # Path to expose metrics on
+  metricsPath: "/metrics"
+
+# Configuration for the status config map
+# By default if this config section is not provided, the exporter will look for cluster-autoscaler-status config map in
+# kube-system namespace
+statusConfigMap:
+  namespace: "kube-system"
+  name: "cluster-autoscaler-status"

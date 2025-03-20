@@ -17,44 +17,59 @@ resources:
 - https://github.com/prosimcorp/cluster-autoscaler-status-exporter//deploy/?ref=main
 ```
 
-## How to release
+## How to run
 
-Each release of this container is done following several steps carefully in order not to break the things for anyone.
+You can run the exporter using the following command:
 
-1. Test the changes on the code:
+```shell
+$ go run cmd/cluster-autoscaler-status-exporter.go --config <config>
+```
 
-    ```console
-    make test
-    ```
+The `config` parameter is the path to the configuration file. The configuration file is a YAML file with the following
+structure:
 
-   > A release is not done if this stage fails
+```yaml
+---
 
-2. Define the package information
+# Logging configuration
+logging:
+  # debug, info, warn, error, dpanic, panic, fatal
+  level: info
+  # console or json
+  format: json
 
-    ```console
-    export VERSION="0.0.1"
-    ```
+# Server configuration
+server:
+  # Address to listen on
+  listenAddress: ":8080"
+  # Path to expose metrics on
+  metricsPath: "/metrics"
 
-3. Generate and push the Docker image (published on Docker Hub).
+# Configuration for the status config map
+# By default if this config section is not provided, the exporter will look for cluster-autoscaler-status config map in
+# kube-system namespace
+statusConfigMap:
+  namespace: "kube-system"
+  name: "cluster-autoscaler-status"
+```
 
-    ```console
-    make docker-buildx
-    ```
+## Metrics exported
 
-## Flags
+The metrics exported are the following:
 
-There are several flags that can be configured to change the behaviour of the
-application. They are described in the following table:
-
-| Name                | Description                                                       |           Default           | Example                         |
-|:--------------------|:------------------------------------------------------------------|:---------------------------:|:--------------------------------|
-| `--connection-mode` | Connect from inside or outside Kubernetes                         |          `kubectl`          | `--connection-mode incluster`   |
-| `--kubeconfig`      | Path to the kubeconfig file                                       |      `~/.kube/config`       | `--kubeconfig "~/.kube/config"` |
-| `--namespace`       | Namespace where to look for Cluster Autoscaler's status configmap |        `kube-system`        | `--namespace "default"`         |
-| `--configmap`       | Name of Cluster Autoscaler's status configmap                     | `cluster-autoscaler-status` | `--configmap "another-cm"`      |
-| `--metrics-port`    | Port to launch the metrics webserver                              |           `2112`            | `--metrics-port "6789"`         |
-| `--metrics-host`    | Host to launch the metrics webserver                              |          `0.0.0.0`          | `--metrics-host "1.1.1.1"`      |
-| `--help`            | Show this help message                                            |              -              | -                               |
+| Metric | Description | Type | Labels |
+|--------|-------------|------|--------|
+| `cluster_autoscaler_status_cloudprovidermaxsize_total` | Maximum number of nodes allowed in the provider. | Gauge | `nodegroup` |
+| `cluster_autoscaler_status_cloudproviderminsize_total` | Minimum number of nodes allowed in the provider. | Gauge | `nodegroup` |
+| `cluster_autoscaler_status_cloudprovidertarget_total` | Desired number of nodes in the provider. | Gauge | `nodegroup` |
+| `cluster_autoscaler_status_health_status` | Health status of the node group (1 = Healthy, 0 = Unhealthy). | Gauge | `nodegroup`, `status` |
+| `cluster_autoscaler_status_long_unregistered_total` | Number of nodes that have been unregistered for a long period. | Gauge | `nodegroup` |
+| `cluster_autoscaler_status_notstarted_total` | Number of registered nodes that have not started. | Gauge | `nodegroup` |
+| `cluster_autoscaler_status_ready_total` | Number of nodes that are ready to schedule pods. | Gauge | `nodegroup` |
+| `cluster_autoscaler_status_registered_total` | Total number of registered nodes. | Gauge | `nodegroup` |
+| `cluster_autoscaler_status_scaledown_status` | Scale-down status of the node group. | Gauge | `nodegroup`, `status` |
+| `cluster_autoscaler_status_scaleup_status` | Scale-up status of the node group. | Gauge | `nodegroup`, `status` |
+| `cluster_autoscaler_status_unregistered_total` | Number of unregistered nodes. | Gauge | `nodegroup` |
 
 ## How to collaborate
 
@@ -68,7 +83,7 @@ For doing it, open an issue to discuss the need of the changes, then:
 
 ## License
 
-Copyright 2022.
+Copyright 2025.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
