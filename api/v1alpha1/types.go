@@ -45,10 +45,13 @@ type HealthStatus struct {
 }
 
 type NodeHealthStatus struct {
-	HealthStatus
-	CloudProviderTarget int `yaml:"cloudProviderTarget"`
-	MinSize             int `yaml:"minSize"`
-	MaxSize             int `yaml:"maxSize"`
+	Status              string     `yaml:"status"`
+	NodeCounts          NodeCounts `yaml:"nodeCounts"`
+	LastProbeTime       string     `yaml:"lastProbeTime"`
+	LastTransitionTime  string     `yaml:"lastTransitionTime"`
+	CloudProviderTarget int        `yaml:"cloudProviderTarget"`
+	MinSize             int        `yaml:"minSize"`
+	MaxSize             int        `yaml:"maxSize"`
 }
 
 type NodeCounts struct {
@@ -58,9 +61,10 @@ type NodeCounts struct {
 }
 
 type RegisteredNodes struct {
-	Total      int `yaml:"total"`
-	Ready      int `yaml:"ready"`
-	NotStarted int `yaml:"notStarted"`
+	Total        int `yaml:"total"`
+	Ready        int `yaml:"ready"`
+	NotStarted   int `yaml:"notStarted"`
+	BeingDeleted int `yaml:"beingDeleted"`
 }
 
 type ScalingStatus struct {
